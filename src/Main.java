@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,9 +12,9 @@ public class Main {
         System.out.println("4 задание: " + stripUrlParams("https://edabit.com?a=1&b=2&a=2"));
         System.out.println("5 задание: " + Arrays.toString(getHashTags("Why You Will Probably Pay More for Your Christmas Tree This Year")));
         System.out.println("5 задание: " + Arrays.toString(getHashTags("Visualizing Science")));
-        System.out.println("6 задание: " + ulam(4));
+        System.out.println("6 задание: " + ulam(206 ));
         System.out.println("7 задание: " + longestNonrepeatingSubstring("abcabcbb"));
-        System.out.println("8 задание: " + convertToRoman(16));
+        System.out.println("8 задание: " + convertToRoman(812));
         System.out.println("9 задание: " + formula("6 * 4 = 24"));
         System.out.println("10 задание: " + palindromeDescendant(11211230));
     }
@@ -37,7 +35,7 @@ public class Main {
                 bell[i][j] = bell[i-1][j-1] + bell[i][j-1];
             }
         }
-        //первый элемент последнего ряда
+        // первый элемент последнего ряда
         return bell[n][0];
     }
 
@@ -51,122 +49,72 @@ public class Main {
 
     public static String translateSentence(String sentence) {
         String[] words = sentence.split(" ");
-        for (int i = 0; i < words.length; i++){
+        for (int i = 0; i < words.length; i++) {
             words[i] = translateWord(words[i]);
         }
         return String.join(" ", words);
     }
 
-    public static boolean validColor(String color) {
-        // rgb in color
-        if (!color.contains("rgb"))
-            return false;
-        boolean isRgba = false;
-        if (color.contains("rgba")){
-            isRgba = true;
-            color = color.substring(4);
-        } else {
-            color = color.substring(3);
+    public static boolean validColor(String sentence) {
+        Pattern pattern_usual = Pattern.compile("^rgb\\((\\d+),(\\d+),(\\d+)\\)$"); // rgb
+        Pattern pattern_a = Pattern.compile("^rgba\\((\\d+),(\\d+),(\\d+),(\\d+(?:\\.\\d)\\d*)\\)$"); // rgba
+        Matcher matcher_a = pattern_a.matcher(sentence);
+        boolean isUsual = false;
+        Matcher matcher;
+
+        if (matcher_a.find())
+            matcher = pattern_a.matcher(sentence);
+        else {
+            matcher= pattern_usual.matcher(sentence);
+            isUsual = true;
         }
-        //Проверка строки на наличие скобок и затем обрезка их.
-        if (color.charAt(0) != '(' || color.charAt(color.length() - 1) != ')')
-            return false;
-        color = color.substring(1, color.length() - 1);
 
-        //Разбка оставшихся чисел на массив строк.
-        String[] numbers = color.split(",");
-
-        //Проверка на то что цвет не в формате RGBA, а чисел не три.
-        if (!isRgba && numbers.length != 3)
-            return false;
-
-        //Попытка спарсить три первых числа и сразу проверка на то, что они в интервале [0, 255].
-        for (int i = 0; i < 3; i++) {
-            try {
-                int num = Integer.parseInt(numbers[i]);
-                if (num < 0 || num > 255)
+        if (matcher.find()){
+            for (int i = 1; i <= 3; i++)
+            {
+                int value = Integer.parseInt(matcher.group(i));
+                if (value < 0  || value > 255)
                     return false;
-            } catch (NumberFormatException num_error){
-                return false;
             }
-        }
-        //Когда цвет в формате RGBA пытаемся спарсить и проверить четвёртое дробное число на интервал [0, 1.0].
-        if (numbers.length == 4) {
-            try {
-                double num = Double.parseDouble(numbers[3]);
-                if (num < 0 || num > 1)
-                    return false;
-            } catch (NumberFormatException num_error){
+            if (!isUsual && (Double.parseDouble(matcher.group(4)) < 0 || Double.parseDouble(matcher.group(4)) > 1))
                 return false;
-            }
         }
+        else
+            return false;
         return true;
     }
 
-    /** Фукнция для исключения повторяющихся параметров из строки URL, а также для удаления исключённых параметров*/
-    public static String stripUrlParams(String url, String[] ...subParamsToStrip){
-        //Узнаём где у нас в строке '?' слева получается чистый url, справа параметры.
-        int askIdx = url.indexOf('?');
-        //Если параметров нет, то ответом будет url.
-        if(askIdx == -1)return url;
-        //Получаем чистый url.
-        String cleanUrl = url.substring(0, askIdx);
-        //Получаем параметры разбивая правую часть строки по '&'.
-        String[] params = url.substring(askIdx + 1).split("&");
-        int excludedLength = params.length;
-        //Указатель на пустую ячейку исключений.
-        int excludedPtr = 0;
-        //Объявляем массив исключений, его длина - максимальное число исключений, т.е кол-во параметров + кол-во исключений.
-        String[] excluded;
-        //Если есть исключения.
-        if(subParamsToStrip.length != 0){
-            //Длина массива исключений увеличивается.
-            excludedLength += subParamsToStrip[0].length;
-            //Если длина исключений больше единицы, то параметры заданы неправильно.
-            if(subParamsToStrip.length > 1) return "Error";
-            //Создаём массив исключений.
-            excluded = new String[excludedLength];
-            //Добавляем исключения в массив исключений.
-            for(int i = 0; i < subParamsToStrip[0].length; i++){
-                excluded[excludedPtr] = subParamsToStrip[0][i];
-                excludedPtr++;
+    public static String stripUrlParams(String url, String[] arr) {
+        if (url.contains("?")) {
+            String newUrl = url.split("\\?")[0] + "?";
+            String[] pArr = url.split("\\?")[1].split("\\&");
+
+            Map<String, Integer> pMap = new HashMap<String, Integer>();
+            for (var p : pArr) {
+                String[] t = p.split("\\=");
+
+                boolean skip = false;
+                for (var sep: arr) {
+                    if (t[0].equals(sep)) {
+                        skip = true;
+                        break;
+                    }
+                }
+
+                if (skip) continue;
+                pMap.put(t[0], Integer.parseInt(t[1]));
             }
-        } else {
-            //Если нет исключения, то массив исключений будет пустым.
-            excluded = new String[excludedLength];
-        }
-        StringBuilder answer = new StringBuilder();
-        //Инициализируем массив для разбиения параметра, а также переменную для ключа и значения.
-        String paramWord;
-        String paramVal;
-        //Итерируем по параметрам.
-        for(int i = 0; i < params.length; i++){
-            //Получаем ключ из параметра.
-            paramWord = params[i].split("=")[0];
-            //Если параметр уже в исключениях, то пропускаем его.
-            if(Arrays.asList(excluded).contains(paramWord))continue;
-            //Ищем СловоПараметра + "=" в массиве параметров, с конца, чтобы получить последнее значение.
-            String toFind = paramWord + "=";
-            //ptr - указатель на значение параметра с конца.
-            int ptr = params.length - 1;
-            int paramIdx = params[ptr].indexOf(toFind);
-            while(ptr > -1 && paramIdx != 0){
-                paramIdx = params[ptr].indexOf(toFind);
-                ptr--;
+
+            for (Map.Entry<String, Integer> item : pMap.entrySet()) {
+                newUrl += item.getKey() + "=" + item.getValue() + "&";
             }
-            //Сохраняем последнее значение параметра в строку.
-            paramVal = params[ptr].substring(paramIdx + toFind.length());
-            //Если параметр первый, то добавляем ? иначе &.
-            if(i == 0)answer.append("?");
-            else answer.append("&");
-            //Добавляем параметр в ответ.
-            answer.append(paramWord).append("=").append(paramVal);
-            //Добавляем параметр в исключения.
-            excluded[excludedPtr] = paramWord;
-            excludedPtr++;
-        }
-        answer.insert(0, cleanUrl);
-        return answer.toString();
+            newUrl = (newUrl.charAt(newUrl.length()-1) == '&') ? newUrl.substring(0, newUrl.length()-1) : newUrl;
+            return newUrl;
+        } else
+            return url;
+    }
+    public static String stripUrlParams(String url) {
+        return stripUrlParams(url, new String[] {""});
     }
 
     public static String getLongestWord(List<String> s) { // ищём самое длинное слово
@@ -184,84 +132,73 @@ public class Main {
 
         String s1 = getLongestWord(strArr);
 
-        for (int i = 0; i < 3; i++) { // поочередно ищем самое длинное слово
+        for (int i = 0; i < 3; i++) {
             s1 = getLongestWord(strArr);
             longestWords.add("#" + s1.toLowerCase());
-            strArr.remove(s1); // удаляем самое длинное слово, чтобы не встретить его вновь
+            strArr.remove(s1);
         }
         return longestWords.toArray();
     }
 
-    /** Функция находящая n-ое число последовательности улама */
     public static int ulam(int n){
-        //Если число меньше трёх, то возвращаем его значение.
-        if(n < 1)return 0;
-        if(n == 1)return 1;
-        if(n == 2)return 2;
-        //Создаём массив для хранения чисел улама.
+        if (n < 1)
+            return 0;
+        if (n == 1)
+            return 1;
+        if (n == 2)
+            return 2;
         int[] ulamSeq = new int[n];
-        //Вносим первые элементы.
-        ulamSeq[0] = 1;
-        ulamSeq[1] = 2;
-        int ulamSeqIdx = 2;
-        int ulamNum = 3;
-        //Так как сумма всегда возрастает от числа к числу(Далее СЧУ), то мы перебираем последовательно все числа от 3 до n.
-        //Итерируем в цикле пока номер числа улана не будет n.
-        while(ulamSeqIdx < n){
-            //Считаем сколькими способами можно представить СЧУ.
+        ulamSeq[0] = 1; ulamSeq[1] = 2;
+        int ulamSeqIdx = 2; // индекс номер числа
+        int ulamNum = 3; // номер числа
+        while (ulamSeqIdx < n){
             int counter = 0;
-            for(int i = 0; i < ulamSeqIdx; i++){
-                for(int j = i + 1; j < ulamSeqIdx; j++){
-                    if(ulamSeq[i] + ulamSeq[j] == ulamNum)counter++;
+            for (int i = 0; i < ulamSeqIdx; i++){
+                for (int j = i + 1; j < ulamSeqIdx; j++){
+                    if (ulamSeq[i] + ulamSeq[j] == ulamNum)
+                        counter++;
+                    if (counter > 1) break;
                 }
             }
-            //Если способ один, то это число улама, записываем число в массив и увеличиваем индекс.
-            if(counter == 1){
+            if (counter == 1) {
                 ulamSeq[ulamSeqIdx] = ulamNum;
                 ulamSeqIdx++;
             }
-            //Увеличиваем СЧУ.
             ulamNum++;
         }
         return ulamSeq[n - 1];
     }
 
-    /** Функция, находящая самую длинную, неповторяющуюся символьную последовательность в строке */
     public static String longestNonrepeatingSubstring(String seq){
-        int seqLength = seq.length();
-        if(seqLength == 0)return "";
-        if(seqLength == 1)return seq;
-        //Инициализация переменных максимальной длины последовательности и индекса её начала.
+        if (seq.length() == 0)
+             return "";
+        if (seq.length() == 1)
+            return seq;
+        // макс длина последовательности и индекса её начала.
         int maxLen = 1;
         int maxIdx = 0;
-        //Инициализация переменных текущей длины последовательности и индекса её начала.
+        // текущая длины последовательности и индекса её начала.
         int currLen = 1;
         int currIdx = 0;
         StringBuilder usedChars = new StringBuilder();
         usedChars.append(seq.charAt(0));
-        for(int i = 1; i < seqLength; i++){
-            //Получаем индекс текущего итерируемого символа.
-            int charIdx = usedChars.indexOf(String.valueOf(seq.charAt(i)));
-            //Если его нет в сохранённой последовательности, то добавляем его туда и идём дальше.
-            if(charIdx == -1){
+        for (int i = 1; i < seq.length(); i++){
+            if (usedChars.indexOf(String.valueOf(seq.charAt(i))) == -1){
                 currLen++;
                 usedChars.append(seq.charAt(i));
             } else {
-                //Если же он там есть, то уникальная последовательность закончилась, и мы сохраняем максимальную из них.
-                if(currLen > maxLen){
-                    maxLen = currLen;
-                    maxIdx = currIdx;
+                // Если есть, то уникальная последовательность закончилась, и мы сохраняем максимальную из них.
+                if (currLen > maxLen) {
+                    maxLen = currLen; maxIdx = currIdx;
                 }
-                currLen = 1;
-                currIdx = i;
+                currLen = 1; currIdx = i;
                 usedChars = new StringBuilder();
                 usedChars.append(seq.charAt(i));
             }
         }
-        //Последняя проверка, т.к. последовательность может закончиться в конце строки.
-        if(currLen > maxLen){
-            maxLen = currLen;
-            maxIdx = currIdx;
+        // если конец последовательности в конце строки
+        if (currLen > maxLen) {
+            maxLen = currLen; maxIdx = currIdx;
         }
         return seq.substring(maxIdx, maxIdx + maxLen);
     }
@@ -271,30 +208,36 @@ public class Main {
 
         int m1 = n / 1000;
 
-        for (int i = 0; i < m1; i++) s.append("M");
+        s.append("M".repeat(m1));
 
         int m2 = n % 1000;
         int c1 = m2 / 100;
 
         if (c1 >= 5) {
             if (c1 == 9) s.append("CM");
-            else if (c1 >= 5) s.append("D");
-        } else {
+            else if (c1 >= 5)
+                s.append("D");
+                s.append("C".repeat(c1-5));
+        }
+        else {
             if (c1 == 4) s.append("CD");
-            else if (c1 == 0) s.append("");
-            else for (int i = 0; i < c1; i++) s.append("C");
+            else
+                for (int i = 0; i < c1; i++)
+                    s.append("C");
         }
 
         int c2 = m2 % 100;
         int x1 = c2 / 10;
 
         if (x1 >= 5) {
-            if (x1 == 9) s.append("XC");
-            else if (x1 >= 5) s.append("L");
+            if (x1 == 9)
+                s.append("XC");
+            else if (x1 >= 5)
+                s.append("L");
         } else {
-            if (x1 == 4) s.append("XL");
-            else if (x1 == 0) s.append("");
-            else for (int i = 0; i < x1; i++) s.append("X");
+            if (x1 == 4)
+                s.append("XL");
+            else s.append("X".repeat(x1));
         }
 
         int x2 = c2 % 10;
@@ -304,42 +247,38 @@ public class Main {
         return s.toString();
     }
 
-    /** Функция решает простейшие математические выражения путём обращения в рекурсию при каждой новой операции */
-    public static int solvePart(String part){
-        //Строка со всеми допущенными операциями.
-        String operations = "+-*/";
-        //Находим индекс символа операции в строке.
-        int idx = 0;
-        while(idx < part.length() && operations.indexOf(part.charAt(idx)) == -1)idx++;
-        //Если операция не найдена в строке, то мы считам что там уже нет операций и возвращаем число.
-        if(idx == part.length())return Integer.parseInt(part.strip());
-        //Получаем операцию и в зависимости от неё возвращаем рекурсивно обработку левой и правой части по необходимой операции.
-        char operation = part.charAt(idx);
-        return switch (operation) {
-            case '+' -> solvePart(part.substring(0, idx)) + solvePart(part.substring(idx + 1));
-            case '-' -> solvePart(part.substring(0, idx)) - solvePart(part.substring(idx + 1));
-            case '*' -> solvePart(part.substring(0, idx)) * solvePart(part.substring(idx + 1));
-            case '/' -> solvePart(part.substring(0, idx)) / solvePart(part.substring(idx + 1));
-            default -> 0;
-        };
-    }
-
-    /** Функция проверяет строку с формулой на математическую достоверность*/
-    public static boolean formula(String form){
-        //Проверяем есть ли '=' в строке.
-        int equalsIdx = form.indexOf("=");
-        if(equalsIdx == -1)return false;
-        //Проверяем больше ли одного "=" в строке.
-        if(form.indexOf("=", equalsIdx + 1) != -1)return false;
-        //Разбиваем строку на две части по "=".
-        String[] parts = form.split("=");
-        //Если "=" в начале или конце строки, то формула неверна.
-        if(parts.length != 2)return false;
-        //Получаем вычисленные части формулы.
-        int leftPart = solvePart(parts[0]);
-        int rightPart = solvePart(parts[1]);
-        //Сравниваем их.
-        return leftPart == rightPart;
+    public static boolean formula(String s) {
+        Set Set_res = new LinkedHashSet();
+        String[] gg = s.split("=");
+        for (var n : gg) {
+            n = n.trim();
+            String[] n1 = n.split(" ");
+            if (n1.length == 3) {
+                double a = Double.parseDouble(n1[0]);
+                double b = Double.parseDouble(n1[2]);
+                double res = 0;
+                switch (n1[1])
+                {
+                    case "+":
+                        res = a + b;
+                        break;
+                    case "-":
+                        res = a - b;
+                        break;
+                    case "/":
+                        if (b == 0)
+                            return false;
+                        res = a / b;
+                        break;
+                    case "*":
+                        res = a*b;
+                        break;
+                }
+                Set_res.add(res);
+            }
+            else Set_res.add(Double.parseDouble(n1[0]));
+        }
+        return Set_res.size() == 1;
     }
 
     public static String getDescendant(String n) { // получение потомка
