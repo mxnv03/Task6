@@ -3,20 +3,72 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Main {
-    public static void main(String[] args){
-        System.out.println("1 задание: " + bell(2));
-        System.out.println("2 задание: " + translateWord("flag"));
-        System.out.println("2 задание: " + translateSentence("I like to eat honey waffles."));
-        System.out.println("3 задание: " + validColor("rgb(0,,0)"));
-        System.out.println("3 задание: " + validColor("rgba(0,0,0,0.123456789)"));
-        System.out.println("4 задание: " + stripUrlParams("https://edabit.com?a=1&b=2&a=2"));
-        System.out.println("5 задание: " + Arrays.toString(getHashTags("Why You Will Probably Pay More for Your Christmas Tree This Year")));
-        System.out.println("5 задание: " + Arrays.toString(getHashTags("Visualizing Science")));
-        System.out.println("6 задание: " + ulam(206 ));
-        System.out.println("7 задание: " + longestNonrepeatingSubstring("abcabcbb"));
-        System.out.println("8 задание: " + convertToRoman(812));
-        System.out.println("9 задание: " + formula("6 * 4 = 24"));
-        System.out.println("10 задание: " + palindromeDescendant(11211230));
+    public static void main(String[] args) throws Exception{
+        task_name(1, "bell");
+        System.out.println(bell(1));
+        System.out.println(bell(2));
+        System.out.println(bell(3));
+        System.out.println(bell(4));
+
+        task_name(2, "translateWord");
+        System.out.println(translateWord("flag"));
+        System.out.println(translateWord("Apple"));
+        System.out.println(translateWord("button"));
+        System.out.println(translateWord(""));
+        System.out.println(translateSentence("I like to eat honey waffles."));
+        System.out.println(translateSentence("Do you think it is going to rain today?"));
+
+        task_name(3, "validColor");
+        System.out.println(validColor("rgb(0,0,0)"));
+        System.out.println(validColor("rgb(0,,0)"));
+        System.out.println(validColor("rgb(255,256,255)"));
+        System.out.println(validColor("rgba(0,0,0,0.123456789)"));
+
+        task_name(4,  "stripUrlParams");
+        System.out.println(stripUrlParams("https://edabit.com?a=1&b=2&a=2"));
+        System.out.println(stripUrlParams("https://edabit.com?a=1&b=2&a=2", new String[] {"b"}));
+        System.out.println(stripUrlParams("https://edabit.com", new String[] {"b"}));
+
+        task_name(5, "getHashTags");
+        System.out.println(getHashTags("How the Avocado Became the Fruit of the Global Trade"));
+        System.out.println(getHashTags("Why You Will Probably Pay More for Your Christmas Tree This Year"));
+        System.out.println(getHashTags("Hey Parents, Surprise, Fruit Juice Is Not Fruit"));
+        System.out.println(getHashTags("Science Visualizing"));
+
+        task_name(6, "ulam");
+        System.out.println(ulam(4));
+        System.out.println(ulam(9));
+        System.out.println(ulam(206));
+
+        task_name(7, "longestNonrepeatingSubstring");
+        System.out.println(longestNonrepeatingSubstring("abcabcbb"));
+        System.out.println(longestNonrepeatingSubstring("aaaaaa"));
+        System.out.println(longestNonrepeatingSubstring("abcde"));
+        System.out.println(longestNonrepeatingSubstring("abcda"));
+
+        task_name(8, "convertToRoman");
+        System.out.println(convertToRoman(2));
+        System.out.println(convertToRoman(12));
+        System.out.println(convertToRoman(16));
+        System.out.println(convertToRoman(66));
+        System.out.println(convertToRoman(46));
+        System.out.println(convertToRoman(996));
+        System.out.println(convertToRoman(2499));
+
+        task_name(9, "formula");
+        System.out.println(formula("6 * 4 = 24"));
+        System.out.println(formula("18 / 17 = 2"));
+        System.out.println(formula("16 * 10 = 160 = 14 + 120"));
+
+        task_name(10, "palindromedescendant");
+        System.out.println(palindromeDescendant(11211230));
+        System.out.println(palindromeDescendant(13001120));
+        System.out.println(palindromeDescendant(23336014));
+        System.out.println(palindromeDescendant(1211));
+    }
+
+    private static void task_name(int task, String name) {
+        System.out.println("--- Task #" + task + " --- " + name + " ---");
     }
     public static int bell(int n) {
         int[][] bell = new int[n+1][n+1];
@@ -117,7 +169,7 @@ public class Main {
         return stripUrlParams(url, new String[] {""});
     }
 
-    public static String getLongestWord(List<String> s) { // ищём самое длинное слово
+    public static String getLongestWord(List<String> s) { // ищем самое длинное слово
         String longest_word = "";
 
         for (String w: s) {
@@ -130,7 +182,7 @@ public class Main {
         List<String> strArr = new ArrayList<String>(Arrays.asList(s.split(" ")));
         List<String> longestWords = new ArrayList<String>();
 
-        String s1 = getLongestWord(strArr);
+        String s1;
 
         for (int i = 0; i < 3; i++) {
             s1 = getLongestWord(strArr);
@@ -202,49 +254,25 @@ public class Main {
         }
         return seq.substring(maxIdx, maxIdx + maxLen);
     }
-    public static String convertToRoman(int n) {
-        if (n > 3999) return "Перебор";
-        StringBuilder s = new StringBuilder();
-
-        int m1 = n / 1000;
-
-        s.append("M".repeat(m1));
-
-        int m2 = n % 1000;
-        int c1 = m2 / 100;
-
-        if (c1 >= 5) {
-            if (c1 == 9) s.append("CM");
-            else if (c1 >= 5)
-                s.append("D");
-                s.append("C".repeat(c1-5));
+    public static String convertToRoman(int num){
+        if (num < 1 || num > 3999)
+            return "Error";
+        StringBuilder answer = new StringBuilder();
+        int[] nums = {1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
+        String[] romans = {"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
+        int i = 0;
+        //Итерируем по массиву чисел кратным римским
+        while (num > 0){
+            /*
+             * Если число больше текущего ЧТР, то римское число по ЧТР добавляется в строку, а
+             * из числа вычитается ЧТР, если же число меньше ЧТР, то переходим к следующему ЧТР.
+             */
+            if (num >= nums[i]) {
+                answer.append(romans[i]);
+                num -= nums[i];
+            } else i++;
         }
-        else {
-            if (c1 == 4) s.append("CD");
-            else
-                for (int i = 0; i < c1; i++)
-                    s.append("C");
-        }
-
-        int c2 = m2 % 100;
-        int x1 = c2 / 10;
-
-        if (x1 >= 5) {
-            if (x1 == 9)
-                s.append("XC");
-            else if (x1 >= 5)
-                s.append("L");
-        } else {
-            if (x1 == 4)
-                s.append("XL");
-            else s.append("X".repeat(x1));
-        }
-
-        int x2 = c2 % 10;
-
-        String[] a = {"", "I", "II", "III","IV", "V", "VI", "VII", "VIII", "IX"};
-        s.append(a[x2]);
-        return s.toString();
+        return answer.toString();
     }
 
     public static boolean formula(String s) {
